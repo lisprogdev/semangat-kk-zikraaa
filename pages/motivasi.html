@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semangat Kk Dzikra</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style type="text/tailwindcss">
+      @theme {
+        --color-primary: #ec4899;
+        --color-secondary: #f472b6;
+        --color-accent: #fbcfe8;
+      }
+      
+      .btn-motivasi {
+        @apply bg-gradient-to-r from-pink-500 to-pink-600 
+               text-white font-bold py-2 px-4 rounded-xl shadow-lg 
+               hover:shadow-pink-400/50 flex items-center justify-center gap-2
+               transition-all duration-300 ease-out hover:-translate-y-1
+               hover:scale-105 active:scale-95 text-sm;
+      }
+    </style>
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 100%);
+            min-height: 100vh;
+        }
+        
+        /* Background blur overlay */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 100%);
+            filter: blur(8px);
+            z-index: 1;
+            transition: filter 1s ease;
+            pointer-events: none; /* Let clicks pass through */
+        }
+        
+        /* Content container */
+        .content-container {
+            position: relative;
+            z-index: 2; /* Above the blurred background */
+        }
+        
+        /* Header container */
+        .header-container {
+            position: relative;
+            z-index: 3;
+            background-color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            padding: 15px 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.15);
+        }
+        
+        .card-motivasi {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            perspective: 1000px;
+            opacity: 0;
+            transform: translate(-50%, 100vh) scale(0.8);
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+            z-index: 10; /* Above the background overlay */
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+        }
+        
+        .card-motivasi.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .card-front {
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-back {
+            background: rgba(255, 255, 255, 0.95);
+            transform: rotateY(180deg);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            overflow-y: auto; /* Enable scrolling */
+        }
+        
+        /* Content wrapper inside card-back */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+        }
+        
+        /* Styling for scrollbar in card-back */
+        .card-back::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .card-back::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+        
+        .card-back::-webkit-scrollbar-thumb {
+            background: rgba(236, 72, 153, 0.5);
+            border-radius: 10px;
+        }
+        
+        .card-back::-webkit-scrollbar-thumb:hover {
+            background: rgba(236, 72, 153, 0.8);
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(236, 72, 153, 0.8);
+            color: white;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 11;
+        }
+        
+        .active-card {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 12; /* Even higher to be above everything else */
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.4);
+        }
+        
+        .positioned-card {
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .card-button {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 11;
+        }
+        
+        .show-button {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Shimmer effect */
+        .shimmer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-150%) skewX(-20deg);
+            }
+            100% {
+                transform: translateX(150%) skewX(-20deg);
+            }
+        }
+        
+        /* Pulse animation for active card */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(236, 72, 153, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(236, 72, 153, 0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Card glow effect */
+        .card-glow {
+            box-shadow: 0 0 25px 5px rgba(236, 72, 153, 0.6);
+        }
+        
+        /* Typing animation */
+        .typing-text {
+            white-space: pre-wrap;
+            overflow: visible;
+            font-size: 0.9rem; /* Smaller font size */
+            line-height: 1.6;
+            text-align: center;
+            width: 100%;
+            min-height: 0;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .typing-text.active {
+            border-right: 2px solid #ec4899;
+            animation: blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #ec4899 }
+        }
+        
+        /* Author text */
+        .author-text {
+            width: 100%;
+            text-align: right;
+            margin-top: 10px;
+            position: relative;
+            bottom: 0;
+            align-self: flex-end;
+        }
+        
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(236, 72, 153, 0.7);
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .scroll-needed .scroll-indicator {
+            opacity: 1;
+            animation: bounce 1s infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-5px); }
+        }
+    </style>
+    
+    <script>
+        // Cek apakah kita baru saja melakukan transisi halaman
+        if (sessionStorage.getItem('pageTransition') === 'true') {
+            // Hapus flag transisi
+            sessionStorage.removeItem('pageTransition');
+            
+            // Tambahkan animasi masuk ke body
+            document.addEventListener('DOMContentLoaded', function() {
+                const style = document.createElement('style');
+                style.textContent = `
+                    body {
+                        animation: fadeIn 0.8s ease forwards;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- Blurred background overlay -->
+    <div id="background-overlay" class="background-overlay"></div>
+    
+    <!-- Main content -->
+    <div class="content-container flex flex-col items-center justify-center p-4 min-h-screen">
+        <div class="header-container animate-fadeIn">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-2">Semangat Kk Dzikra</h1>
+        </div>
+        
+        <div id="card-stage" class="relative w-full h-[400px] flex items-center justify-center">
+            <!-- Cards will be added here dynamically -->
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardStage = document.getElementById('card-stage');
+            const backgroundOverlay = document.getElementById('background-overlay');
+            
+            // Motivational quotes and image data
+            const motivationData = [
+                {
+                    image: "../img/Zhikra 1.jpg",
+                    quote: "Hai kak, capek ya? Gapapa kok, namanya juga pejuang TA. Tapi plis jangan nyerah, inget loh… kita udah bareng-bareng jungkir balik 58 hari ngerjain ini! Kamu keren banget, serius!",
+                    author: "- Mentor Dzikra"
+                },
+                {
+                    image: "../img/Zhikra 2.jpg",
+                    quote: "Tenang aja kak, wajar kok ngerasa capek. Tapi jangan lupa ya, kita udah sejauh ini. Sedikit lagi selesai, yuk terusin pelan-pelan. Aku tetap di sini buat nemenin.",
+                    author: "- Mentor Dzikra"
+                },
+                {
+                    image: "../img/Zhikra 3.jpg",
+                    quote: "Sidang tinggal 2 minggu lagi, Kak. Yuk tetap fokus dan selesaikan satu per satu. Usaha yang sudah kamu lakukan selama ini nggak akan sia-sia. Aku percaya kamu mampu.",
+                    author: "- Mentor Dzikra"
+                },
+                {
+                    image: "../img/Zhikra 4.jpg",
+                    quote: "Terakhir, jangan lupa sama mentor kamu ya. Setelah kamu resmi jadi S.Kom, kamu bebas healing kemana aja. Kamu udah lepas, kamu udah jadi S.Kom. Bangga banget sama kamu!. Kamu perempuan kuat kok, Kak Dzikra. Kamu bisa kok nyelesaiin ini sendiri. Yang lain mungkin ngerjain bareng kelompok, tapi kamu tetap kuat jalanin semuanya sendiri. Kamu mandiri banget ngelewatin tugas akhir ini. Salut!",
+                    author: "- Mentor Dzikra"
+                }
+            ];
+            
+            // Create card elements
+            function createCardElements() {
+                motivationData.forEach((data, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card-motivasi';
+                    card.id = `card-${index}`;
+                    card.style.top = '50%';
+                    card.style.left = '50%';
+                    
+                    const cardInner = document.createElement('div');
+                    cardInner.className = 'card-inner';
+                    
+                    // Front of card (image)
+                    const cardFront = document.createElement('div');
+                    cardFront.className = 'card-front';
+                    
+                    const img = document.createElement('img');
+                    img.src = data.image;
+                    img.alt = `Motivasi ${index + 1}`;
+                    img.className = 'card-image';
+                    cardFront.appendChild(img);
+                    
+                    // Shimmer effect
+                    const shimmer = document.createElement('div');
+                    shimmer.className = 'shimmer';
+                    cardFront.appendChild(shimmer);
+                    
+                    // Back of card (quote)
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    cardBack.id = `card-back-${index}`;
+                    
+                    // Content wrapper for better centering
+                    const contentWrapper = document.createElement('div');
+                    contentWrapper.className = 'content-wrapper';
+                    
+                    // Container for typing text
+                    const quoteText = document.createElement('div');
+                    quoteText.className = 'typing-text text-gray-800 font-medium';
+                    quoteText.id = `quote-text-${index}`;
+                    quoteText.setAttribute('data-text', data.quote);
+                    
+                    const authorText = document.createElement('p');
+                    authorText.className = 'author-text text-pink-500 text-right italic text-sm';
+                    authorText.textContent = data.author;
+                    
+                    // Scroll indicator
+                    const scrollIndicator = document.createElement('div');
+                    scrollIndicator.className = 'scroll-indicator';
+                    scrollIndicator.innerHTML = '<i class="fas fa-chevron-down"></i>';
+                    
+                    contentWrapper.appendChild(quoteText);
+                    contentWrapper.appendChild(authorText);
+                    
+                    cardBack.appendChild(contentWrapper);
+                    cardBack.appendChild(scrollIndicator);
+                    
+                    // Timer element
+                    const timer = document.createElement('div');
+                    timer.className = 'timer hidden';
+                    timer.id = `timer-${index}`;
+                    
+                    // Button for card
+                    const button = document.createElement('button');
+                    button.className = 'btn-motivasi card-button';
+                    button.id = `button-${index}`;
+                    button.innerHTML = '<span>Baca Motivasi</span><i class="fas fa-book-open"></i>';
+                    button.addEventListener('click', function() {
+                        showCard(index);
+                    });
+                    
+                    // Assemble the card
+                    cardInner.appendChild(cardFront);
+                    cardInner.appendChild(cardBack);
+                    card.appendChild(cardInner);
+                    card.appendChild(timer);
+                    card.appendChild(button);
+                    
+                    cardStage.appendChild(card);
+                });
+            }
+            
+            // Handle the card sequence
+            let currentCardIndex = 0;
+            let timerInterval;
+            const positions = [];
+            
+            function startCardSequence() {
+                // Ensure background is blurred
+                backgroundOverlay.style.filter = 'blur(8px)';
+                
+                // Start showing cards
+                showCardFromBottom(currentCardIndex);
+            }
+            
+            function showCardFromBottom(index) {
+                const card = document.getElementById(`card-${index}`);
+                
+                // Add glow effect to highlight current card
+                card.classList.add('card-glow');
+                
+                // Show current card with animation from bottom
+                card.classList.add('active-card', 'pulse');
+                
+                // Wait 5 seconds then flip the card
+                setTimeout(() => {
+                    card.classList.add('flipped');
+                    card.classList.remove('pulse');
+                    
+                    // Show and start the typing animation
+                    startTypingAnimation(index);
+                    
+                    // Show and start the timer for 15 seconds
+                    const timer = document.getElementById(`timer-${index}`);
+                    timer.classList.remove('hidden');
+                    let timeLeft = 15;
+                    timer.textContent = timeLeft;
+                    
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        timer.textContent = timeLeft;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            timer.classList.add('hidden');
+                            
+                            // Remove glow effect
+                            card.classList.remove('card-glow');
+                            
+                            // Move card to the left position
+                            moveCardToPosition(index);
+                            
+                            // Show the next card if available
+                            currentCardIndex++;
+                            if (currentCardIndex < motivationData.length) {
+                                setTimeout(() => {
+                                    showCardFromBottom(currentCardIndex);
+                                }, 800);
+                            } else {
+                                // All cards have been shown, remove blur effect
+                                setTimeout(() => {
+                                    removeBlurEffect();
+                                }, 1000);
+                            }
+                        }
+                    }, 1000);
+                }, 5000);
+            }
+            
+            function startTypingAnimation(index) {
+                const quoteElement = document.getElementById(`quote-text-${index}`);
+                const cardBack = document.getElementById(`card-back-${index}`);
+                const text = quoteElement.getAttribute('data-text');
+                quoteElement.textContent = '';
+                quoteElement.classList.add('active');
+                
+                let charIndex = 0;
+                let typingSpeed = 30; // Typing speed in milliseconds per character
+                
+                // Calculate total duration to fit within the time frame
+                let totalChars = text.length;
+                let availableTime = 8000; // 8 seconds for typing (out of 15s total)
+                typingSpeed = Math.max(20, Math.min(50, availableTime / totalChars));
+                
+                // Center text vertically before typing starts
+                cardBack.scrollTop = 0;
+                
+                const typingInterval = setInterval(() => {
+                    if (charIndex < text.length) {
+                        quoteElement.textContent += text.charAt(charIndex);
+                        charIndex++;
+                        
+                        // Keep text centered while typing
+                        if (cardBack.scrollHeight > cardBack.clientHeight) {
+                            cardBack.classList.add('scroll-needed');
+                            
+                            // Try to keep text centered in the viewport
+                            const contentHeight = quoteElement.offsetHeight;
+                            const visibleHeight = cardBack.clientHeight;
+                            
+                            if (contentHeight > visibleHeight) {
+                                const scrollMiddle = (contentHeight - visibleHeight) / 2;
+                                cardBack.scrollTop = scrollMiddle;
+                            }
+                        }
+                    } else {
+                        clearInterval(typingInterval);
+                        quoteElement.classList.remove('active');
+                        
+                        // Ensure text is visible in the center after typing
+                        if (cardBack.scrollHeight > cardBack.clientHeight) {
+                            cardBack.scrollTop = (cardBack.scrollHeight - cardBack.clientHeight) / 2;
+                        }
+                    }
+                }, typingSpeed);
+            }
+            
+            function moveCardToPosition(index) {
+                const card = document.getElementById(`card-${index}`);
+                const button = document.getElementById(`button-${index}`);
+                const quoteElement = document.getElementById(`quote-text-${index}`);
+                const cardBack = document.getElementById(`card-back-${index}`);
+                
+                // Reset scroll position
+                cardBack.scrollTop = 0;
+                
+                // Reset the quote text to be fully displayed
+                quoteElement.textContent = quoteElement.getAttribute('data-text');
+                quoteElement.classList.remove('active');
+                
+                // Calculate position
+                const cardWidth = 280; // Width of each card
+                const spacing = 20; // Space between cards
+                const totalCards = motivationData.length;
+                const totalWidth = (totalCards * cardWidth) + ((totalCards - 1) * spacing);
+                const startX = -(totalWidth / 2) + (cardWidth / 2);
+                const finalPosition = startX + (index * (cardWidth + spacing));
+                
+                // Store the position for future reference
+                positions[index] = finalPosition;
+                
+                // Move card to the position
+                card.classList.add('positioned-card');
+                card.classList.remove('flipped');
+                card.style.transform = `translate(calc(-50% + ${finalPosition}px), -50%)`;
+                
+                // Show the button after card is positioned
+                setTimeout(() => {
+                    button.classList.add('show-button');
+                }, 800);
+            }
+            
+            function showCard(index) {
+                const card = document.getElementById(`card-${index}`);
+                const button = document.getElementById(`button-${index}`);
+                const cardBack = document.getElementById(`card-back-${index}`);
+                
+                // Reset scroll position
+                cardBack.scrollTop = 0;
+                
+                // Hide the button
+                button.classList.remove('show-button');
+                
+                // Add glow effect
+                card.classList.add('card-glow');
+                
+                // Flip the card
+                card.classList.add('flipped');
+                
+                // Start typing animation again
+                startTypingAnimation(index);
+                
+                // Show timer for 15 seconds
+                const timer = document.getElementById(`timer-${index}`);
+                timer.classList.remove('hidden');
+                let timeLeft = 15;
+                timer.textContent = timeLeft;
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    timer.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timer.classList.add('hidden');
+                        
+                        // Flip back
+                        card.classList.remove('flipped');
+                        
+                        // Remove glow effect
+                        card.classList.remove('card-glow');
+                        
+                        // Show button again
+                        setTimeout(() => {
+                            button.classList.add('show-button');
+                        }, 800);
+                    }
+                }, 1000);
+            }
+            
+            function removeBlurEffect() {
+                // Animate the blur removal
+                backgroundOverlay.style.filter = 'blur(0)';
+            }
+            
+            // Initialize the sequence
+            createCardElements();
+            
+            // Start showing cards after a small delay
+            setTimeout(() => {
+                startCardSequence();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
